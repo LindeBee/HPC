@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     int Y= 1;
     double G = 6.673e-11;
     double t1,t2; //timers
-    int trials = 1; //number of trials
+    int trials = 10; //number of trials
     double time[trials]; 
     double avg = 0; 
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
             mass[q] = fabs((rand() / (double)(RAND_MAX)));
         }
 
-        t1 = mysecond();
+        t1 = omp_get_wtime();
 
         //simple algorithm
         for (int t =0; t<steps; t++){
@@ -61,7 +61,9 @@ int main(int argc, char *argv[]) {
             //         printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
             //     }
             // }
+			#pragma omp parallel for
             for (int q =0; q<N; q++){
+				#pragma omp parallel for private(x_diff, y_diff)
                 for (int k=0; k<N; k++){
                     if (k!=q){
                         //calculate forces 
@@ -80,6 +82,7 @@ int main(int argc, char *argv[]) {
                 vel[q][X] += delta_t/mass[q]*forces[q][X]; 
                 vel[q][Y] += delta_t/mass[q]*forces[q][Y];
             }
+			#pragma omp parallel for
             for (int q =0; q<N; q++){
                 //update positions used for calculating next timestep
                 old_pos[q][X] = pos[q][X];
@@ -87,7 +90,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        t2 = mysecond();
+        t2 = omp_get_wtime();
 
         // //print results
         // printf("results:\n");

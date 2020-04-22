@@ -8,15 +8,9 @@
 double mysecond();
 
 int main(int argc, char *argv[]) {
-    
-    #define DIM 2
-<<<<<<< HEAD
     #define N 1000
-=======
-    #define N 2000
     #define X 0
     #define Y 1
->>>>>>> f0f17b7f5c88cf72ff6473327a60243ef655104c
 
     srand(1); //seed
     double delta_t = 0.05;
@@ -25,7 +19,7 @@ int main(int argc, char *argv[]) {
     int freq = 10;
     double G = 6.673e-11;
     double t1,t2; //timers
-    int trials = 1; //number of trials
+    int trials = 10; //number of trials
     double time[trials]; 
     double avg = 0; 
 
@@ -91,10 +85,10 @@ int main(int argc, char *argv[]) {
         t2 = mysecond();
 
         //print results
-        printf("results:\n");
-        for (int q =0; q<N;q++){
-            printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
-        }
+        //printf("results:\n");
+        //for (int q =0; q<N;q++){
+        //    printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+        //}
 
         time[j] = t2-t1;
         avg += (t2-t1);

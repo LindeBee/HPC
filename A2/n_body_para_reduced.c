@@ -4,15 +4,16 @@
 #include <sys/time.h>
 #include <math.h>
 #include <string.h>
+#include <omp.h>
 
 double mysecond();
 
 int main(int argc, char *argv[]) {
 
-    #define N 1000
+    #define N 2000
     #define DIM 2
 
-    srand(0); //seed
+    srand(1); //seed
     double delta_t = 0.05;
     double fin_t = 2;
     int steps = 100;//(int)(fin_t/delta_t);
@@ -61,7 +62,7 @@ int main(int argc, char *argv[]) {
             // }
             double forces[N][DIM] = {0};
 
-			#pragma omp for private(x_diff, y_diff, force_qkX, force_qKY)
+			#pragma omp parallel for //private(x_diff, y_diff, force_qkX, force_qkY)
             for (int q =0; q<N; q++){
                 for (int k=q+1; k<N; k++){
                     //calculate forces 
