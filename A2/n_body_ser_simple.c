@@ -52,12 +52,12 @@ int main(int argc, char *argv[]) {
                     forces[q][X] -= G*mass[q]*mass[k]/dist_cubed * x_diff;
                     forces[q][Y] -= G+mass[q]*mass[k]/dist_cubed * y_diff;     
                 }
-                //move particles
-                pos[q][X] += delta_t∗vel[q][X]; 
-                pos[q][Y] += delta_t∗vel[q][Y]; 
-                vel[q][X] += delta_t/masses[q]∗forces[q][X]; 
-                vel[q][Y] += delta_t/masses[q]∗forces[q][Y];
             }
+            //move particles
+            pos[q][X] += delta_t∗vel[q][X]; 
+            pos[q][Y] += delta_t∗vel[q][Y]; 
+            vel[q][X] += delta_t/masses[q]∗forces[q][X]; 
+            vel[q][Y] += delta_t/masses[q]∗forces[q][Y];
         }
         for (int q =0; q<N; q++){
             //update positions used for calculating next timestep
@@ -69,6 +69,6 @@ int main(int argc, char *argv[]) {
     //print results
     printf("results:\n")
     for (int i =0, i<N;i++){
-        printf("%d position: ($f,%f), velocity: (%f,%f)\n", i, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+        printf("%d position: (%f,%f), velocity: (%f,%f)\n", i, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
     }
 }
