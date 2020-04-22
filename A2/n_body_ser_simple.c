@@ -10,7 +10,7 @@ double mysecond();
 int main(int argc, char *argv[]) {
     
     #define DIM 2
-    #define N 2000
+    #define N 500
     #define X 0
     #define Y 1
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     int freq = 10;
     double G = 6.673e-11;
     double t1,t2; //timers
-    int trials = 1; //number of trials
+    int trials = 50; //number of trials
     double time[trials]; 
     double avg = 0; 
 
@@ -63,24 +63,22 @@ int main(int argc, char *argv[]) {
                     if (k!=q){
                         //calculate forces 
                         //based on positions at previous timestep
-                        x_diff = old_pos[q][X] - old_pos[k][X];
-                        y_diff = old_pos[q][Y] - old_pos[k][Y];
+                        x_diff = pos[q][X] - pos[k][X];
+                        y_diff = pos[q][Y] - pos[k][Y];
                         dist = sqrt(x_diff*x_diff + y_diff*y_diff);
                         dist_cubed = dist*dist*dist;
                         forces[q][X] -= G*mass[q]*mass[k]/dist_cubed * x_diff;
                         forces[q][Y] -= G*mass[q]*mass[k]/dist_cubed * y_diff;     
                     }
                 }
+                
+            }
+            for (int q =0; q<N; q++){
                 //move particles
                 pos[q][X] += delta_t*vel[q][X]; 
                 pos[q][Y] += delta_t*vel[q][Y]; 
                 vel[q][X] += delta_t/mass[q]*forces[q][X]; 
                 vel[q][Y] += delta_t/mass[q]*forces[q][Y];
-            }
-            for (int q =0; q<N; q++){
-                //update positions used for calculating next timestep
-                old_pos[q][X] = pos[q][X];
-                old_pos[q][Y] = pos[q][Y];
             }
         }
 
