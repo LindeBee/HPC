@@ -8,11 +8,12 @@
 int main(int argc, char *argv[]) {
     
     #define DIM 2
-    #define N 1000
+    #define N 10
 
     srand(time(0)); //seed
     double delta_t = 0.05;
     double fin_t = 2;
+    int freq = 10;
     int X = 0;
     int Y= 1;
     double x_diff, y_diff, dist, dist_cubed; //variable for calculations
@@ -40,8 +41,16 @@ int main(int argc, char *argv[]) {
 		mass[q] = fabs((rand() / (double)(RAND_MAX)));
     }
 
+    int steps = (int)(fin_t/delta_t);
     //simple algorithm
-    for (double t =0.0; t<=fin_t; t+= delta_t){
+    for (int t =0; t<steps; t++){
+        if (t % (steps/freq) == 0){
+            //print results
+            printf("results (t = %f):\n", (t*delta_t));
+            for (int q =0; q<N;q++){
+                printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+            }
+        }
         for (int q =0; q<N; q++){
             for (int k=0; k<N; k++){
                 if (k!=q){
@@ -56,10 +65,10 @@ int main(int argc, char *argv[]) {
                 }
             }
             //move particles
-            pos[q][X] += delta_t∗vel[q][X]; 
-            pos[q][Y] += delta_t∗vel[q][Y]; 
-            vel[q][X] += delta_t/masses[q]∗forces[q][X]; 
-            vel[q][Y] += delta_t/masses[q]∗forces[q][Y];
+            pos[q][X] += delta_t*vel[q][X]; 
+            pos[q][Y] += delta_t*vel[q][Y]; 
+            vel[q][X] += delta_t/mass[q]*forces[q][X]; 
+            vel[q][Y] += delta_t/mass[q]*forces[q][Y];
         }
         for (int q =0; q<N; q++){
             //update positions used for calculating next timestep
@@ -69,8 +78,8 @@ int main(int argc, char *argv[]) {
     }
 
     //print results
-    printf("results:\n")
-    for (int i =0, i<N;i++){
-        printf("%d position: (%f,%f), velocity: (%f,%f)\n", i, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+    printf("results:\n");
+    for (int q =0; q<N;q++){
+        printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
     }
 }
