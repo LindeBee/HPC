@@ -7,10 +7,13 @@
 
 int main(int argc, char *argv[]) {
 
-    int N = 1000; //no of particles
+    #define N 10
+    #define DIM 2
+
     srand(time(0)); //seed
     double delta_t = 0.05;
     double fin_t = 2;
+    int freq = 10;
     int X = 0;
     int Y= 1;
     double x_diff, y_diff, dist, dist_cubed, force_qkX, force_qkY; //variable for calculations
@@ -39,8 +42,16 @@ int main(int argc, char *argv[]) {
     }
 
     //reduced algorithm
-    for (double t =0.0; t<=fin_t; t+= delta_t){
-        double forces[N][2] = {0};
+    int steps = (int)(fin_t/delta_t);
+    for (int t =0; t<steps; t++){
+        if (t % (steps/freq) == 0){
+            //print results
+            printf("results (t = %f):\n", (t*delta_t));
+            for (int q =0; q<N;q++){
+                printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+            }
+        }
+        double forces[N][DIM] = {0};
         for (int q =0; q<N; q++){
             for (int k=q+1; k<N; k++){
                 //calculate forces 
@@ -53,16 +64,16 @@ int main(int argc, char *argv[]) {
                 force_qkY = G+mass[q]*mass[k]/dist_cubed * y_diff;
                 forces[q][X] += force_qkX; 
                 forces[q][Y] += force_qkY; 
-                forces[k][X] −= force_qkX; 
-                forces[k][Y] −= force_qkY;
+                forces[k][X] -= force_qkX; 
+                forces[k][Y] -= force_qkY;
             } 
         }
         for (int q =0; q<N; q++){
             //move particles
-            pos[q][X] += delta_t∗vel[q][X]; 
-            pos[q][Y] += delta_t∗vel[q][Y]; 
-            vel[q][X] += delta_t/masses[q]∗forces[q][X]; 
-            vel[q][Y] += delta_t/masses[q]∗forces[q][Y];
+            pos[q][X] += delta_t*vel[q][X]; 
+            pos[q][Y] += delta_t*vel[q][Y]; 
+            vel[q][X] += delta_t/mass[q]*forces[q][X]; 
+            vel[q][Y] += delta_t/mass[q]*forces[q][Y];
             //update positions used for calculating next timestep
             old_pos[q][X] = pos[q][X];
             old_pos[q][Y] = pos[q][Y];
@@ -70,8 +81,8 @@ int main(int argc, char *argv[]) {
     }
 
     //print results
-    printf("results:\n")
-    for (int i =0, i<N;i++){
-        printf("%d position: (%f,%f), velocity: (%f,%f)\n", i, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+    printf("results:\n");
+    for (int q =0; q<N;q++){
+        printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
     }
 }
