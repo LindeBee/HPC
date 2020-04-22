@@ -9,7 +9,7 @@ double mysecond();
 
 int main(int argc, char *argv[]) {
 
-    #define N 10
+    #define N 1000
     #define DIM 2
 
     srand(time(0)); //seed
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     int Y= 1;
     double G = 6.673e-11;
     double t1,t2; //timers
-    int trials = 100; //number of trials
+    int trials = 1; //number of trials
     double time[trials]; 
     double avg = 0; 
 
