@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
                 dist = sqrt(x_diff*x_diff + y_diff*y_diff);
                 dist_cubed = dist*dist*dist;
                 force_qkX = G*mass[q]*mass[k]/dist_cubed * x_diff;
-                force_qkY = G+mass[q]*mass[k]/dist_cubed * y_diff;
+                force_qkY = G*mass[q]*mass[k]/dist_cubed * y_diff;
                 forces[q][X] += force_qkX; 
                 forces[q][Y] += force_qkY; 
                 forces[k][X] -= force_qkX; 

@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
                     dist = sqrt(x_diff*x_diff + y_diff*y_diff);
                     dist_cubed = dist*dist*dist;
                     forces[q][X] -= G*mass[q]*mass[k]/dist_cubed * x_diff;
-                    forces[q][Y] -= G+mass[q]*mass[k]/dist_cubed * y_diff;     
+                    forces[q][Y] -= G*mass[q]*mass[k]/dist_cubed * y_diff;     
                 }
             }
             //move particles
