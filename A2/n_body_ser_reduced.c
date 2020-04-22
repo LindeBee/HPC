@@ -10,14 +10,14 @@ int main(int argc, char *argv[]) {
     #define N 10
     #define DIM 2
 
-    srand(time(0)); //seed
+    srand(1); //seed
     double delta_t = 0.05;
     double fin_t = 2;
     int freq = 10;
     int X = 0;
     int Y= 1;
     double x_diff, y_diff, dist, dist_cubed, force_qkX, force_qkY; //variable for calculations
-    double G = 1.0;
+    double G = 6.673e-11;
 
     //genenerate particles
     /*TODO: initialisation of these vectors should 
