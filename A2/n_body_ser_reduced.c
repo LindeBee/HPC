@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     int X = 0;
     int Y= 1;
     double x_diff, y_diff, dist, dist_cubed, force_qkX, force_qkY; //variable for calculations
-    double G = 6.673e-11;
+    double G = 1.0;
 
     //genenerate particles
     /*TODO: initialisation of these vectors should 
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     double pos[N][2];
     double old_pos[N][2];
     double vel[N][2];
-    double forces[N][2];
+    
     double mass[N];
 
     for  (int q=0; q<N; q++){
@@ -35,12 +35,12 @@ int main(int argc, char *argv[]) {
         vel[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
 		vel[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
 
-		mass[q] = fabs((rand() / (double)(RAND_MAX)) * 2 - 1);
+		mass[q] = fabs((rand() / (double)(RAND_MAX)));
     }
 
     //reduced algorithm
     for (double t =0.0; t<=fin_t; t+= delta_t){
-        forces = memset(forces, 0, n∗sizeof(vect t);
+        double forces[N][2] = {0};
         for (int q =0; q<N; q++){
             for (int k=q+1; k<N; k++){
                 //calculate forces 

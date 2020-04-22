@@ -6,15 +6,17 @@
 #include <string.h>
 
 int main(int argc, char *argv[]) {
+    
+    #define DIM 2
+    #define N 1000
 
-    int N = 1000; //no of particles
     srand(time(0)); //seed
     double delta_t = 0.05;
     double fin_t = 2;
     int X = 0;
     int Y= 1;
     double x_diff, y_diff, dist, dist_cubed; //variable for calculations
-    double G = 6.673e-11;
+    double G = 1.0;
 
     //genenerate particles
     /*TODO: initialisation of these vectors should 
@@ -35,7 +37,7 @@ int main(int argc, char *argv[]) {
         vel[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
 		vel[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
 
-		mass[q] = fabs((rand() / (double)(RAND_MAX)) * 2 - 1);
+		mass[q] = fabs((rand() / (double)(RAND_MAX)));
     }
 
     //simple algorithm
