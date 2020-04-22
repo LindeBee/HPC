@@ -9,16 +9,16 @@ double mysecond();
 
 int main(int argc, char *argv[]) {
 
-    #define N 1000
+    #define N 2000
     #define DIM 2
+    #define X 0
+    #define Y 1
 
-    srand(time(0)); //seed
+    srand(1); //seed
     double delta_t = 0.05;
     double fin_t = 2;
-    int steps = 100;//(int)(fin_t/delta_t);
+    int cycles = 100;//(int)(fin_t/delta_t);
     int freq = 10;
-    int X = 0;
-    int Y= 1;
     double G = 6.673e-11;
     double t1,t2; //timers
     int trials = 1; //number of trials
@@ -49,8 +49,8 @@ int main(int argc, char *argv[]) {
         t1 = mysecond(); //start recording time
 
         //reduced algorithm
-        for (int t =0; t<steps; t++){
-            // if (t % (steps/freq) == 0){
+        for (int t =0; t<cycles; t++){
+            // if (t % (cycles/freq) == 0){
             //     //print results
             //     printf("results (t = %f):\n", (t*delta_t));
             //     for (int q =0; q<N;q++){
@@ -88,12 +88,12 @@ int main(int argc, char *argv[]) {
 
         t2 = mysecond(); //stop recording time
 
-        // //print results
-        // printf("results:\n");
-        // for (int q =0; q<N;q++){
-        //     printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
-        // }
-        
+        //print results
+        printf("results:\n");
+        for (int q =0; q<N;q++){
+            printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+        }
+
         time[j] = t2-t1;
         avg += (t2-t1);
     }
