@@ -9,7 +9,7 @@ double mysecond();
 
 int main(int argc, char *argv[]) {
 
-    #define N 2000
+    #define N 1000
     #define DIM 2
     #define X 0
     #define Y 1
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     int freq = 10;
     double G = 6.673e-11;
     double t1,t2; //timers
-    int trials = 1; //number of trials
+    int trials = 10; //number of trials
     double time[trials]; 
     double avg = 0; 
 
@@ -57,6 +57,12 @@ int main(int argc, char *argv[]) {
             //         printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
             //     }
             // }
+			if (t == (cycles - 1)) {
+				//print results
+				for (int q = N - 1; q < N; q++) {
+					printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X], pos[q][Y], vel[q][X], vel[q][Y]);
+				}
+			}
             double forces[N][DIM] = {0};
             for (int q =0; q<N; q++){
                 for (int k=q+1; k<N; k++){
@@ -89,10 +95,10 @@ int main(int argc, char *argv[]) {
         t2 = mysecond(); //stop recording time
 
         //print results
-        printf("results:\n");
-        for (int q =0; q<N;q++){
-            printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
-        }
+        //printf("results:\n");
+        //for (int q =0; q<N;q++){
+        //    printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
+        //}
 
         time[j] = t2-t1;
         avg += (t2-t1);

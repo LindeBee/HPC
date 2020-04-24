@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     #define DIM 2
     #define N 1000
 
-    srand(0); //seed
+    srand(1); //seed
     double delta_t = 0.05;
     double fin_t = 2;
     int steps = 100;//(int)(fin_t/delta_t);
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
             // }
 			#pragma omp parallel for
             for (int q =0; q<N; q++){
-				#pragma omp parallel for private(x_diff, y_diff)
+				#pragma omp parallel for private(x_diff, y_diff, dist, dist_cubed)
                 for (int k=0; k<N; k++){
                     if (k!=q){
                         //calculate forces 
@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
                 vel[q][X] += delta_t/mass[q]*forces[q][X]; 
                 vel[q][Y] += delta_t/mass[q]*forces[q][Y];
             }
+
 			#pragma omp parallel for
             for (int q =0; q<N; q++){
                 //update positions used for calculating next timestep
