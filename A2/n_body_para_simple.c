@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
             // }
 			#pragma omp parallel for
             for (int q =0; q<N; q++){
-				#pragma omp parallel for private(x_diff, y_diff)
+				#pragma omp parallel for private(x_diff, y_diff, dist, dist_cubed)
                 for (int k=0; k<N; k++){
                     if (k!=q){
                         //calculate forces 
