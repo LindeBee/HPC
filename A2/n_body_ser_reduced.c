@@ -25,25 +25,41 @@ int main(int argc, char *argv[]) {
     double time[trials]; 
     double avg = 0; 
 
+	double temp_pos[N][2];
+	double temp_vel[N][2];
+	double temp_mass[N];
+
+	for (int q = 0; q < N; q++) {
+		temp_pos[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+		temp_pos[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+
+		temp_vel[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+		temp_vel[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+
+		temp_mass[q] = fabs((rand() / (double)(RAND_MAX)));
+	}
+
     for (int j = 0; j<trials; j++){
         double x_diff, y_diff, dist, dist_cubed, force_qkX, force_qkY; //variable for calculations
         
-        //genenerate particles
+        //generate particles
         double pos[N][2];
         double old_pos[N][2];
         double vel[N][2];
         double mass[N];
-        for  (int q=0; q<N; q++){
-            pos[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
-            pos[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+
+        for(int q=0; q<N; q++)
+		{
+            pos[q][X] = temp_pos[q][X];
+            pos[q][Y] = temp_pos[q][Y];
 
             old_pos[q][X] = pos[q][X];
             old_pos[q][Y] = pos[q][Y];
 
-            vel[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
-            vel[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+            vel[q][X] = temp_vel[q][X];
+            vel[q][Y] = temp_vel[q][Y];
 
-            mass[q] = fabs((rand() / (double)(RAND_MAX)));
+            mass[q] = temp_mass[q];
         }
 
         t1 = mysecond(); //start recording time
@@ -57,12 +73,12 @@ int main(int argc, char *argv[]) {
             //         printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X],pos[q][Y],vel[q][X],vel[q][Y]);
             //     }
             // }
-			if (t == (cycles - 1)) {
+			/*if (t == (cycles - 1)) {
 				//print results
 				for (int q = N - 1; q < N; q++) {
 					printf("%d position: (%f,%f), velocity: (%f,%f)\n", q, pos[q][X], pos[q][Y], vel[q][X], vel[q][Y]);
 				}
-			}
+			}*/
             double forces[N][DIM] = {0};
             for (int q =0; q<N; q++){
                 for (int k=q+1; k<N; k++){

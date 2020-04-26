@@ -29,33 +29,49 @@ int main(int argc, char *argv[]) {
 	// For thread comparison
 	int threads[] = { 1,2,4,8,12,16,20,24,28,32 };
 
-	for (int k = 0; k < 10; k++) {
+	double temp_pos[N][2];
+	double temp_vel[N][2];
+	double temp_mass[N];
+
+	//Can't parallelise because rand() is not thread-safe
+	for (int q = 0; q < N; q++) {
+		temp_pos[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+		temp_pos[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+
+		temp_vel[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+		temp_vel[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+
+		temp_mass[q] = fabs((rand() / (double)(RAND_MAX)));
+	}
+
+	for (int k = 0; k < 10; k++)
+	{
 
 		omp_set_num_threads(threads[k]);
 		int MAX_THREADS = omp_get_max_threads();
-		printf("Threads: %d\n", threads[k]);
+		printf("Threads: %d\n", MAX_THREADS);
 
 		for (int j = 0; j < trials; j++) {
 			double x_diff, y_diff, dist, dist_cubed, force_qkX, force_qkY; //variable for calculations
 
-			//genenerate particles
+			//generate particles
 			double pos[N][2];
 			double old_pos[N][2];
 			double vel[N][2];
 			double mass[N];
 
-			//Can't parallelise because rand() is not thread-safe
-			for (int q = 0; q < N; q++) {
-				pos[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
-				pos[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+			for (int q = 0; q < N; q++)
+			{
+				pos[q][X] = temp_pos[q][X];
+				pos[q][Y] = temp_pos[q][Y];
 
 				old_pos[q][X] = pos[q][X];
 				old_pos[q][Y] = pos[q][Y];
 
-				vel[q][X] = (rand() / (double)(RAND_MAX)) * 2 - 1;
-				vel[q][Y] = (rand() / (double)(RAND_MAX)) * 2 - 1;
+				vel[q][X] = temp_vel[q][X];
+				vel[q][Y] = temp_vel[q][Y];
 
-				mass[q] = fabs((rand() / (double)(RAND_MAX)));
+				mass[q] = temp_mass[q];
 			}
 
 			t1 = omp_get_wtime(); //start recording time
@@ -76,10 +92,8 @@ int main(int argc, char *argv[]) {
 					}
 				}*/
 				double forces[N][DIM] = { 0 };
-
-				#pragma omp parallel for private(forces)
+				#pragma omp parallel for private(x_diff, y_diff, force_qkX, force_qkY, dist, dist_cubed, forces) schedule(static, 1)
 				for (int q = 0; q < N; q++) {
-					#pragma omp parallel for private(x_diff, y_diff, force_qkX, force_qkY, dist, dist_cubed, forces)
 					for (int k = q + 1; k < N; k++) {
 						//calculate forces 
 						//based on positions at previous timestep
@@ -95,8 +109,6 @@ int main(int argc, char *argv[]) {
 						forces[k][Y] -= force_qkY;
 					}
 				}
-
-				//#pragma omp parallel for
 				for (int q = 0; q < N; q++) {
 					//move particles
 					pos[q][X] += delta_t*vel[q][X];
