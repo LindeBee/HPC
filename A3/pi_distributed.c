@@ -12,8 +12,8 @@
 
 int main(int argc, char* argv[])
 {
-    int count = 0;
-    double x, y, z, pi;
+    int count = 0, intermediate = 0;
+    double x, y, z, pi, start, end;
     
 	int rank, size, i, provided;
 
@@ -24,6 +24,8 @@ int main(int argc, char* argv[])
 
     srand(SEED * rank); // Important: Multiply SEED by "rank" when you introduce MPI!
     
+	start = MPI_Wtime();
+
     // Calculate PI following a Monte Carlo method
     for (int iter = 0; iter < NUM_ITER/size; iter++)
     {
@@ -37,25 +39,26 @@ int main(int argc, char* argv[])
         {
             count++;
         }
-		if (rank == 0)
-		{
-			for ()
-			{
-				MPI_Recv(&count, size, MPI_FLOAT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			}
-			
-		}
-		else
-		{
-			MPI_Send(&count, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD)
-		}
     }
-    
-    // Estimate Pi and display the result
-    pi = ((double)count / (double)NUM_ITER) * 4.0;
-    
-    printf("The result is %f\n", pi);
-    
+
+	if (rank == 0)
+	{
+		for (int i = 1; i < size; i++)
+		{
+			MPI_Recv(&intermediate, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			count += intermediate;
+		}
+		
+		// Estimate Pi and display the result
+		pi = ((double)count / (double)NUM_ITER) * 4.0;
+		end = MPI_Wtime();
+		printf("The result is %f\tExecution time is %f\n", pi, end - start);
+	}
+	else
+	{
+		MPI_Send(&count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+	}
+
 	MPI_Finalize();
 
     return 0;
