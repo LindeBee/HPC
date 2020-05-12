@@ -16,8 +16,8 @@ int main(int argc, char* argv[])
 {
     
     int count = 0;
-    double x, y, z, pi, pi_in;
-    int rank, size, provided, status;
+    double x, y, z, pi;
+    int rank, size, provided, status, count_in;
     double t1, t2; //timers
 
 
@@ -44,31 +44,30 @@ int main(int argc, char* argv[])
             count++;
         }
     }
-    
-    // Estimate Pi and display the result
-    pi = ((double)count / (double)n_iters) * 4.0;
-  
+
     int nodes = size;
     int step = 1;
     while (nodes > 1){
         // for (int i = 0; i < size; i += step){
             if (rank%(2*step) == step){
-                // printf("Rank %d sending %f to %d\n", rank, pi, rank-step);
-                MPI_Send(&pi, 1, MPI_DOUBLE, (rank-step), nodes, MPI_COMM_WORLD);
+                // printf("Rank %d sending %d to %d\n", rank, count, rank-step);
+                MPI_Send(&count, 1, MPI_DOUBLE, (rank-step), nodes, MPI_COMM_WORLD);
             }
             else if (rank%(2*step) == 0) {
-                MPI_Recv(&pi_in, 1, MPI_DOUBLE, (rank+step), nodes, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                // printf("Rank %d receiving %f from %d\n", rank, pi_in, rank+step);
-                pi = pi+pi_in;
+                MPI_Recv(&count_in, 1, MPI_DOUBLE, (rank+step), nodes, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                // printf("Rank %d receiving %d from %d\n", rank, count_in, rank+step);
+                count = count+count_in;
             }
         // }
         step = step * 2;
         nodes = nodes/2;
     }
-    t2 = MPI_Wtime();
 
     if (rank == 0){
-        printf("The result is %lf\n", pi/size);
+        // Estimate Pi and display the result
+        pi = ((double)count / (double)NUM_ITER) * 4.0;
+        t2 = MPI_Wtime();
+        printf("The result is %lf\n", pi);
         printf ("time: %lf\n", t2-t1);
     }
 
