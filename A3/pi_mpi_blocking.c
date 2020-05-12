@@ -9,7 +9,7 @@
 
 
 #define SEED     921
-#define NUM_ITER 1000000000
+#define NUM_ITER 1280000000
 
 
 int main(int argc, char* argv[])
@@ -28,10 +28,10 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
     srand(SEED*rank); // Important: Multiply SEED by "rank" when you introduce MPI!
-    
+    int n_iters = NUM_ITER/size;
     t1 = MPI_Wtime();
     // Calculate PI following a Monte Carlo method
-    for (int iter = 0; iter < NUM_ITER/size; iter++)
+    for (int iter = 0; iter < n_iters; iter++)
     {
         // Generate random (X,Y) points
         x = (double)random() / (double)RAND_MAX;
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     }
     
     // Estimate Pi and display the result
-    pi = ((double)count / (double)NUM_ITER) * 4.0;
+    pi = ((double)count / (double)n_iters) * 4.0;
   
     int nodes = size;
     int step = 1;
