@@ -9,7 +9,7 @@
 
 
 #define SEED     921
-#define NUM_ITER 1280000000
+#define NUM_ITER 1000000000
 
 
 int main(int argc, char* argv[])
@@ -51,10 +51,10 @@ int main(int argc, char* argv[])
         // for (int i = 0; i < size; i += step){
             if (rank%(2*step) == step){
                 // printf("Rank %d sending %d to %d\n", rank, count, rank-step);
-                MPI_Send(&count, 1, MPI_DOUBLE, (rank-step), nodes, MPI_COMM_WORLD);
+                MPI_Send(&count, 1, MPI_INT, (rank-step), nodes, MPI_COMM_WORLD);
             }
             else if (rank%(2*step) == 0) {
-                MPI_Recv(&count_in, 1, MPI_DOUBLE, (rank+step), nodes, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&count_in, 1, MPI_INT, (rank+step), nodes, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 // printf("Rank %d receiving %d from %d\n", rank, count_in, rank+step);
                 count = count+count_in;
             }
