@@ -7,10 +7,10 @@
 #include <time.h>
 #include <mpi.h>
 
+#define SEED     921
+
 int main(int argc, char* argv[])
 {
-    // TODO: initialise matrix A, B, (C=zeros(A(1), B(0)))
-
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -19,13 +19,29 @@ int main(int argc, char* argv[])
     // Store processes in matrix
     dim = sqrt(size);
     int *proc = NULL;
-    if (rank == 0) { 
-        proc = malloc(dim*dim*sizeof(int))
-        int p = 0;
-        for (int i = 0; i<dim; i++){
-            for (int j = 0; j<dim; j++){
-                proc[i][j] = p;
-                p++;
+    proc = malloc(dim*dim*sizeof(int));
+    int p = 0;
+    for (int i = 0; i<dim; i++){
+        for (int j = 0; j<dim; j++){
+            proc[i][j] = p;
+            p++;
+        }
+    }
+
+    // TODO: initialise matrix A, B, (C=zeros(A(1), B(0)))
+    if (rank == 0){
+        int *full_A = NULL;
+        int *full_B = NULL;
+        int *full_C = NULL;
+        m_dim = 4;
+        full_A = malloc(m_dim*m_dim*sizeof(int));
+        full_B = malloc(m_dim*m_dim*sizeof(int));
+        full_C = malloc(m_dim*m_dim*sizeof(int));
+        for (int i = 0; i<m_dim; i++){
+            for (int j = 0; j<m_dim; j++){
+                full_A[i][j] = rand();
+                full_B[i][j] = rand();
+                full_C[i][j] = 0;
             }
         }
     }
