@@ -53,7 +53,8 @@ int main(int argc, char* argv[])
                 full_C[I_GMAT(i,j)] = 0;
             }
         }
-        //DEBUG: print matrix A
+        //print matrix A
+        printf("A:\n");
         for (int i = 0; i<m_dim; i++){
             for (int j = 0; j<m_dim; j++){
                 printf("%3d", full_A[I_GMAT(i,j)]);
@@ -61,7 +62,8 @@ int main(int argc, char* argv[])
             printf("\n");
         }
         printf("\n");
-        //DEBUG: print matrix B
+        //print matrix B
+        printf("B:\n");
         for (int i = 0; i<m_dim; i++){
             for (int j = 0; j<m_dim; j++){
                 printf("%3d", full_B[I_GMAT(i,j)]);
@@ -72,6 +74,7 @@ int main(int argc, char* argv[])
     }
     
     // TODO: pad matrix if necessary
+
     // divide matrices into subblocks and  subblocks over processes
     int sub_dim = m_dim/p_dim;
     #define I_SMAT(R,C) ((R) * sub_dim + (C))
@@ -104,45 +107,28 @@ int main(int argc, char* argv[])
     MPI_Get(loc_C, sub_dim*sub_dim ,MPI_INT, 0, my_row*m_dim*sub_dim+my_col*sub_dim ,1 , submat, win);
     MPI_Win_fence(0, win);
     MPI_Win_free(&win);
-
-    // if (rank == proc[I_PROC(1,1)]){
-    // //DEBUG: print sub-matrices
-    // printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
-    //     for (int i = 0; i<sub_dim; i++){
-    //         for (int j = 0; j<sub_dim; j++){
-    //             printf("%3d", loc_A[I_SMAT(i,j)]);
-    //         }
-    //         printf("\n");
-    //     }
-    // }
     
     //initialize cartesian communication system
     MPI_Comm cart_comm;
     MPI_Comm row_comm; 
+    MPI_Comm col_comm; 
     int dims[2] = {p_dim,p_dim};
     int periodic[2] = {0,0};
-    int remain[2] = {0,1};
+    int remain_r[2] = {0,1};
+    int remain_c[2] = {1,0};
     MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periodic, 0, &cart_comm);
-    MPI_Cart_sub(cart_comm, remain, &row_comm);
+    MPI_Cart_sub(cart_comm, remain_r, &row_comm);
+    MPI_Cart_sub(cart_comm, remain_c, &col_comm);
 
     int *curr_A; //to store broadcasted A in without forgetting own A
     curr_A = malloc(sub_dim*sub_dim*sizeof(int));
     
-    for (int r=0; r<1; r++ ){
+    for (int r=0; r<p_dim; r++ ){
         // broadcast diagonal + i subblocks of A in horizontal direction
         memcpy(curr_A,loc_A,sub_dim*sub_dim*sizeof(int));
         MPI_Bcast(curr_A, sub_dim*sub_dim, MPI_INT, (my_row+r)%p_dim, row_comm);
-        //DEBUG: print new local A matrices
-        // printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
-        // for (int i = 0; i<sub_dim; i++){
-        //     for (int j = 0; j<sub_dim; j++){
-        //         printf("%3d", curr_A[I_SMAT(i,j)]);
-        //     }
-        //     printf("\n");
-        // }
-        // works up to here!
-        
-        // TODO: multiply copied A subblocks into B subblocks
+
+        // multiply copied A subblocks into B subblocks
         for (int i = 0; i<sub_dim; i++){
             for (int j = 0; j<sub_dim; j++){
                 for (int k = 0; k<sub_dim; k++){
@@ -151,16 +137,37 @@ int main(int argc, char* argv[])
             }
         }
 
-        //DEBUG: print new local C matrices
-        printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
-        for (int i = 0; i<sub_dim; i++){
-            for (int j = 0; j<sub_dim; j++){
-                printf("%3d", loc_C[I_SMAT(i,j)]);
+        // roll B blocks
+        MPI_Sendrecv_replace(loc_B, sub_dim*sub_dim, MPI_INT, (my_row+1)%p_dim, r, (my_row-1+p_dim)%p_dim, r, col_comm, MPI_STATUS_IGNORE);
+        // works up to here!
+    }
+
+    //DEBUG: print new local  matrices
+    // printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
+    // for (int i = 0; i<sub_dim; i++){
+    //     for (int j = 0; j<sub_dim; j++){
+    //         printf("%10d", loc_C[I_SMAT(i,j)]);
+    //     }
+    //     printf("\n");
+    // }
+
+    MPI_Win_create(full_C, m_dim*m_dim*sizeof(int), sizeof(int), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+    MPI_Win_fence(0, win);
+    MPI_Put(loc_C, sub_dim*sub_dim ,MPI_INT, 0, my_row*m_dim*sub_dim+my_col*sub_dim ,1 , submat, win);
+    MPI_Win_fence(0, win);
+    MPI_Win_free(&win);
+
+    //print matrix C
+    if (rank ==0){
+        printf("result:\n");
+        for (int i = 0; i<m_dim; i++){
+            for (int j = 0; j<m_dim; j++){
+                printf("%5d", full_C[I_GMAT(i,j)]);
             }
             printf("\n");
         }
-        // TODO: roll B blocks
     }
+    // works up to here!
 
     MPI_Finalize();
 
