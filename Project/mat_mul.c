@@ -37,43 +37,68 @@ int main(int argc, char* argv[])
     }
 
     // initialise matrix A, B, (C=zeros(A(1), B(0)))
-    int m_dim = 4;
+    int m_dim_nopad = 15;
+    int m_dim =  p_dim * (m_dim_nopad/p_dim + (m_dim_nopad % p_dim != 0));
+
     int *full_A = NULL;
     int *full_B = NULL;
     int *full_C = NULL;
+    int *ser_C = NULL;
     full_A = malloc(m_dim*m_dim*sizeof(int));
     full_B = malloc(m_dim*m_dim*sizeof(int));
     full_C = malloc(m_dim*m_dim*sizeof(int));
+    ser_C = malloc(m_dim*m_dim*sizeof(int));
     #define I_GMAT(R,C) ((R) * m_dim + (C))
     if (rank == 0){
         for (int i = 0; i<m_dim; i++){
             for (int j = 0; j<m_dim; j++){
-                full_A[I_GMAT(i,j)] = rand()%9+1;
-                full_B[I_GMAT(i,j)] = rand()%9+1;
+                if (i>=m_dim_nopad && j>=m_dim_nopad){
+                    full_A[I_GMAT(i,j)] = 1;
+                    full_B[I_GMAT(i,j)] = 1;
+                } else if (i>=m_dim_nopad || j>=m_dim_nopad){
+                    full_A[I_GMAT(i,j)] = 0;
+                    full_B[I_GMAT(i,j)] = 0;
+                } else {
+                    full_A[I_GMAT(i,j)] = rand()%9+1;
+                    full_B[I_GMAT(i,j)] = rand()%9+1;
+                }
                 full_C[I_GMAT(i,j)] = 0;
+                ser_C[I_GMAT(i,j)] = 0;
             }
         }
-        //print matrix A
-        printf("A:\n");
-        for (int i = 0; i<m_dim; i++){
-            for (int j = 0; j<m_dim; j++){
-                printf("%3d", full_A[I_GMAT(i,j)]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-        //print matrix B
-        printf("B:\n");
-        for (int i = 0; i<m_dim; i++){
-            for (int j = 0; j<m_dim; j++){
-                printf("%3d", full_B[I_GMAT(i,j)]);
-            }
-            printf("\n");
-        }
-        printf("\n");
+        // //print matrix A
+        // printf("A:\n");
+        // for (int i = 0; i<m_dim_nopad; i++){
+        //     for (int j = 0; j<m_dim_nopad; j++){
+        //         printf("%3d", full_A[I_GMAT(i,j)]);
+        //     }
+        //     printf("\n");
+        // }
+        // printf("\n");
+        // //print matrix B
+        // printf("B:\n");
+        // for (int i = 0; i<m_dim_nopad; i++){
+        //     for (int j = 0; j<m_dim_nopad; j++){
+        //         printf("%3d", full_B[I_GMAT(i,j)]);
+        //     }
+        //     printf("\n");
+        // }
+        // printf("\n");
     }
     
-    // TODO: pad matrix if necessary
+    // serial code to test result
+    if (rank==0){
+        printf("actual result:\n");
+        for (int i = 0; i<m_dim_nopad; i++){
+            for (int j = 0; j<m_dim_nopad; j++){
+                for (int k = 0; k<m_dim_nopad; k++){
+                    ser_C[I_GMAT(i,j)] += full_A[I_GMAT(i,k)]*full_B[I_GMAT(k,j)];
+                }
+                // printf("%5d", ser_C[I_GMAT(i,j)]);
+            }
+            // printf("\n");
+        }
+    }
 
     // divide matrices into subblocks and  subblocks over processes
     int sub_dim = m_dim/p_dim;
@@ -138,7 +163,7 @@ int main(int argc, char* argv[])
         }
 
         // roll B blocks
-        MPI_Sendrecv_replace(loc_B, sub_dim*sub_dim, MPI_INT, (my_row+1)%p_dim, r, (my_row-1+p_dim)%p_dim, r, col_comm, MPI_STATUS_IGNORE);
+        MPI_Sendrecv_replace(loc_B, sub_dim*sub_dim, MPI_INT, (my_row-1+p_dim)%p_dim, r,(my_row+1)%p_dim , r, col_comm, MPI_STATUS_IGNORE);
         // works up to here!
     }
 
@@ -159,15 +184,33 @@ int main(int argc, char* argv[])
 
     //print matrix C
     if (rank ==0){
-        printf("result:\n");
-        for (int i = 0; i<m_dim; i++){
-            for (int j = 0; j<m_dim; j++){
-                printf("%5d", full_C[I_GMAT(i,j)]);
+        // DEBUG: optional print results
+        // printf("result:\n");
+        // for (int i = 0; i<m_dim_nopad; i++){
+        //     for (int j = 0; j<m_dim_nopad; j++){
+        //         printf("%5d", full_C[I_GMAT(i,j)]);
+        //     }
+        //     printf("\n");
+        // }
+        int stop = 0;
+        for (int i = 0; i<m_dim_nopad; i++){
+            for (int j = 0; j<m_dim_nopad; j++){
+                if (full_C[I_GMAT(i,j)] != full_C[I_GMAT(i,j)]){
+                    stop =1;
+                    printf("incorrect!\n");
+                    break;
+                }
             }
-            printf("\n");
+            if (stop){
+                break;
+            }
+        }
+        if (!stop){
+            printf("correct!\n");
         }
     }
     // works up to here!
+
 
     MPI_Finalize();
 
