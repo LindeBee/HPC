@@ -61,14 +61,14 @@ int main(int argc, char* argv[])
             printf("\n");
         }
         printf("\n");
-        // //DEBUG: print matrix B
-        // for (int i = 0; i<m_dim; i++){
-        //     for (int j = 0; j<m_dim; j++){
-        //         printf("%3d", full_B[I_GMAT(i,j)]);
-        //     }
-        //     printf("\n");
-        // }
-        // printf("\n");
+        //DEBUG: print matrix B
+        for (int i = 0; i<m_dim; i++){
+            for (int j = 0; j<m_dim; j++){
+                printf("%3d", full_B[I_GMAT(i,j)]);
+            }
+            printf("\n");
+        }
+        printf("\n");
     }
     
     // TODO: pad matrix if necessary
@@ -128,21 +128,37 @@ int main(int argc, char* argv[])
     int *curr_A; //to store broadcasted A in without forgetting own A
     curr_A = malloc(sub_dim*sub_dim*sizeof(int));
     
-    for (int k=0; k<sub_dim; k++ ){
+    for (int r=0; r<1; r++ ){
         // broadcast diagonal + i subblocks of A in horizontal direction
         memcpy(curr_A,loc_A,sub_dim*sub_dim*sizeof(int));
-        MPI_Bcast(curr_A, sub_dim*sub_dim, MPI_INT, (my_row+k)%p_dim, row_comm);
-        printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
-        for (int i = 0; i<sub_dim; i++){
-            for (int j = 0; j<sub_dim; j++){
-                printf("%3d", curr_A[I_SMAT(i,j)]);
-            }
-            printf("\n");
-        }
+        MPI_Bcast(curr_A, sub_dim*sub_dim, MPI_INT, (my_row+r)%p_dim, row_comm);
+        //DEBUG: print new local A matrices
+        // printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
+        // for (int i = 0; i<sub_dim; i++){
+        //     for (int j = 0; j<sub_dim; j++){
+        //         printf("%3d", curr_A[I_SMAT(i,j)]);
+        //     }
+        //     printf("\n");
+        // }
         // works up to here!
         
         // TODO: multiply copied A subblocks into B subblocks
+        for (int i = 0; i<sub_dim; i++){
+            for (int j = 0; j<sub_dim; j++){
+                for (int k = 0; k<sub_dim; k++){
+                    loc_C[I_SMAT(i,j)] += curr_A[I_SMAT(i,k)]*loc_B[I_SMAT(k,j)];
+                }
+            }
+        }
 
+        //DEBUG: print new local C matrices
+        printf("my rank: %d, my row: %d, my column:, %d\n", rank, my_row, my_col);
+        for (int i = 0; i<sub_dim; i++){
+            for (int j = 0; j<sub_dim; j++){
+                printf("%3d", loc_C[I_SMAT(i,j)]);
+            }
+            printf("\n");
+        }
         // TODO: roll B blocks
     }
 
