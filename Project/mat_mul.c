@@ -39,17 +39,16 @@ int main(int argc, char* argv[])
     // initialise matrix A, B, (C=zeros(A(1), B(0)))
     int m_dim_nopad = 15;
     int m_dim =  p_dim * (m_dim_nopad/p_dim + (m_dim_nopad % p_dim != 0));
-
-    int *full_A = NULL;
-    int *full_B = NULL;
-    int *full_C = NULL;
-    int *ser_C = NULL;
-    full_A = malloc(m_dim*m_dim*sizeof(int));
-    full_B = malloc(m_dim*m_dim*sizeof(int));
-    full_C = malloc(m_dim*m_dim*sizeof(int));
-    ser_C = malloc(m_dim*m_dim*sizeof(int));
+    int *full_A;
+    int *full_B;
+    int *full_C;
+    int *ser_C;
     #define I_GMAT(R,C) ((R) * m_dim + (C))
     if (rank == 0){
+        full_A = malloc(m_dim*m_dim*sizeof(int));
+        full_B = malloc(m_dim*m_dim*sizeof(int));
+        full_C = malloc(m_dim*m_dim*sizeof(int));
+        ser_C = malloc(m_dim*m_dim*sizeof(int));
         for (int i = 0; i<m_dim; i++){
             for (int j = 0; j<m_dim; j++){
                 if (i>=m_dim_nopad && j>=m_dim_nopad){
