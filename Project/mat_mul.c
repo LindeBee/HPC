@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     }
 
     // initialise matrix A, B, (C=zeros(A(1), B(0)))
-    int m_dim_nopad = 15;
+    int m_dim_nopad = 240;
     int m_dim =  p_dim * (m_dim_nopad/p_dim + (m_dim_nopad % p_dim != 0));
     int *full_A;
     int *full_B;
@@ -99,6 +99,8 @@ int main(int argc, char* argv[])
         }
     }
 
+    // START TIMER
+
     // divide matrices into subblocks and  subblocks over processes
     int sub_dim = m_dim/p_dim;
     #define I_SMAT(R,C) ((R) * sub_dim + (C))
@@ -114,7 +116,7 @@ int main(int argc, char* argv[])
     MPI_Type_vector(sub_dim, sub_dim, m_dim, MPI_INT, &submat); //it ended up being in MPI datatypes lecture
     MPI_Type_commit(&submat);
 
-    // All processes get sub matrices of B (and C)
+    // All processes get sub matrices of A, B (and C)
     MPI_Win win;
     MPI_Win_create(full_A, m_dim*m_dim*sizeof(int), sizeof(int), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
     MPI_Win_fence(0, win);
@@ -163,7 +165,6 @@ int main(int argc, char* argv[])
 
         // roll B blocks
         MPI_Sendrecv_replace(loc_B, sub_dim*sub_dim, MPI_INT, (my_row-1+p_dim)%p_dim, r,(my_row+1)%p_dim , r, col_comm, MPI_STATUS_IGNORE);
-        // works up to here!
     }
 
     //DEBUG: print new local  matrices
@@ -181,6 +182,8 @@ int main(int argc, char* argv[])
     MPI_Win_fence(0, win);
     MPI_Win_free(&win);
 
+    //STOP TIMER
+
     //print matrix C
     if (rank ==0){
         // DEBUG: optional print results
@@ -194,7 +197,7 @@ int main(int argc, char* argv[])
         int stop = 0;
         for (int i = 0; i<m_dim_nopad; i++){
             for (int j = 0; j<m_dim_nopad; j++){
-                if (full_C[I_GMAT(i,j)] != full_C[I_GMAT(i,j)]){
+                if (full_C[I_GMAT(i,j)] != ser_C[I_GMAT(i,j)]){
                     stop =1;
                     printf("incorrect!\n");
                     break;
@@ -208,8 +211,6 @@ int main(int argc, char* argv[])
             printf("correct!\n");
         }
     }
-    // works up to here!
-
 
     MPI_Finalize();
 
