@@ -12,6 +12,7 @@
 int main(int argc, char* argv[])
 {
     int rank, size, i, provided;
+	double start, end;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
@@ -43,12 +44,18 @@ int main(int argc, char* argv[])
     int *full_B;
     int *full_C;
     int *ser_C;
+
+	full_A = malloc(m_dim*m_dim * sizeof(int));
+	full_B = malloc(m_dim*m_dim * sizeof(int));
+	full_C = malloc(m_dim*m_dim * sizeof(int));
+	ser_C = malloc(m_dim*m_dim * sizeof(int));
+
     #define I_GMAT(R,C) ((R) * m_dim + (C))
     if (rank == 0){
-        full_A = malloc(m_dim*m_dim*sizeof(int));
-        full_B = malloc(m_dim*m_dim*sizeof(int));
-        full_C = malloc(m_dim*m_dim*sizeof(int));
-        ser_C = malloc(m_dim*m_dim*sizeof(int));
+        //full_A = malloc(m_dim*m_dim*sizeof(int));
+        //full_B = malloc(m_dim*m_dim*sizeof(int));
+        //full_C = malloc(m_dim*m_dim*sizeof(int));
+        //ser_C = malloc(m_dim*m_dim*sizeof(int));
         for (int i = 0; i<m_dim; i++){
             for (int j = 0; j<m_dim; j++){
                 if (i>=m_dim_nopad && j>=m_dim_nopad){
@@ -85,7 +92,7 @@ int main(int argc, char* argv[])
         // printf("\n");
     }
     
-    // serial code to test result
+	// Root node serial code to test result and start performance measurements
     if (rank==0){
         printf("actual result:\n");
         for (int i = 0; i<m_dim_nopad; i++){
@@ -97,9 +104,12 @@ int main(int argc, char* argv[])
             }
             // printf("\n");
         }
+
+		// START TIMER
+		start = MPI_Wtime();
     }
 
-    // START TIMER
+    
 
     // divide matrices into subblocks and  subblocks over processes
     int sub_dim = m_dim/p_dim;
@@ -182,10 +192,12 @@ int main(int argc, char* argv[])
     MPI_Win_fence(0, win);
     MPI_Win_free(&win);
 
-    //STOP TIMER
-
-    //print matrix C
+    // Root node final serial code
     if (rank ==0){
+		//STOP TIMER
+		end = MPI_Wtime();
+		printf("Execution time: %f\n", end - start);
+
         // DEBUG: optional print results
         // printf("result:\n");
         // for (int i = 0; i<m_dim_nopad; i++){
@@ -194,6 +206,8 @@ int main(int argc, char* argv[])
         //     }
         //     printf("\n");
         // }
+
+		// Check the correctness of the results of the distributed Fox's algorithm by comparing them to the naive serial implementation
         int stop = 0;
         for (int i = 0; i<m_dim_nopad; i++){
             for (int j = 0; j<m_dim_nopad; j++){
