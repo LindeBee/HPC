@@ -38,17 +38,17 @@ int main(int argc, char* argv[])
     }
 
     // initialise matrix A, B, (C=zeros(A(1), B(0)))
-    int m_dim_nopad = 2048;
+    int m_dim_nopad = 8192;
     int m_dim =  p_dim * (m_dim_nopad/p_dim + (m_dim_nopad % p_dim != 0));
     int *full_A;
     int *full_B;
     int *full_C;
-    int *ser_C;
+    //int *ser_C;
 
 	full_A = malloc(m_dim*m_dim * sizeof(int));
 	full_B = malloc(m_dim*m_dim * sizeof(int));
 	full_C = malloc(m_dim*m_dim * sizeof(int));
-	ser_C = malloc(m_dim*m_dim * sizeof(int));
+	//ser_C = malloc(m_dim*m_dim * sizeof(int));
 
     #define I_GMAT(R,C) ((R) * m_dim + (C))
     if (rank == 0){
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
                     full_B[I_GMAT(i,j)] = rand()%9+1;
                 }
                 full_C[I_GMAT(i,j)] = 0;
-                ser_C[I_GMAT(i,j)] = 0;
+                //ser_C[I_GMAT(i,j)] = 0;
             }
         }
         // //print matrix A
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
     
 	// Root node serial code to test result and start performance measurements
     if (rank==0){
-        printf("actual result:\n");
+        /*printf("actual result:\n");
         for (int i = 0; i<m_dim_nopad; i++){
             for (int j = 0; j<m_dim_nopad; j++){
                 for (int k = 0; k<m_dim_nopad; k++){
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
                 // printf("%5d", ser_C[I_GMAT(i,j)]);
             }
             // printf("\n");
-        }
+        }*/
 
 		// START TIMER
 		start = MPI_Wtime();
@@ -250,8 +250,16 @@ int main(int argc, char* argv[])
         //     printf("\n");
         // }
 
+		// Don't check for very large matrices, serial runtime is too large
+		// Just print some indices of the final matrix
+		printf("%10d\n", full_C[I_GMAT(0, 0)]);
+		printf("%10d\n", full_C[I_GMAT(0, 1)]);
+		printf("%10d\n", full_C[I_GMAT(m_dim - 1, 0)]);
+		printf("%10d\n", full_C[I_GMAT(0, m_dim - 1)]);
+		printf("%10d\n", full_C[I_GMAT(m_dim - 1, m_dim - 1)]);
+
 		// Check the correctness of the results of the distributed Fox's algorithm by comparing them to the naive serial implementation
-        int stop = 0;
+        /*int stop = 0;
         for (int i = 0; i<m_dim_nopad; i++){
             for (int j = 0; j<m_dim_nopad; j++){
                 if (full_C[I_GMAT(i,j)] != ser_C[I_GMAT(i,j)]){
@@ -266,13 +274,14 @@ int main(int argc, char* argv[])
         }
         if (!stop){
             printf("correct!\n");
-        }
+        }*/
+
     }
 
 	free(full_A);
 	free(full_B);
 	free(full_C);
-	free(ser_C);
+	//free(ser_C);
 
     MPI_Finalize();
 
