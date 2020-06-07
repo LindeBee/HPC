@@ -278,6 +278,12 @@ int main(int argc, char* argv[])
     MPI_Win_fence(0, win);
     MPI_Win_free(&win);
 
+	free(loc_A);
+	free(loc_B);
+	free(loc_C);
+	free(curr_A);
+
+
     // Root node final serial code
     if (rank ==0){
 		//STOP TIMER

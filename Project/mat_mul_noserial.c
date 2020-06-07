@@ -8,7 +8,6 @@
 #include <mpi.h>
 
 #define SEED     921
-
 int main(int argc, char* argv[])
 {
     int rank, size, i, provided;
@@ -45,10 +44,14 @@ int main(int argc, char* argv[])
     int *full_C;
     //int *ser_C;
 
-	full_A = malloc(m_dim*m_dim * sizeof(int));
-	full_B = malloc(m_dim*m_dim * sizeof(int));
-	full_C = malloc(m_dim*m_dim * sizeof(int));
+	//full_A = malloc(m_dim*m_dim * sizeof(int));
+	//full_B = malloc(m_dim*m_dim * sizeof(int));
+	//full_C = malloc(m_dim*m_dim * sizeof(int));
 	//ser_C = malloc(m_dim*m_dim * sizeof(int));
+
+	MPI_Alloc_mem(m_dim*m_dim * sizeof(int), MPI_INFO_NULL, &full_A);
+	MPI_Alloc_mem(m_dim*m_dim * sizeof(int), MPI_INFO_NULL, &full_B);
+	MPI_Alloc_mem(m_dim*m_dim * sizeof(int), MPI_INFO_NULL, &full_C);
 
     #define I_GMAT(R,C) ((R) * m_dim + (C))
     if (rank == 0){
@@ -117,9 +120,13 @@ int main(int argc, char* argv[])
     int *loc_A;
     int *loc_B;
     int *loc_C;
-    loc_A = malloc(sub_dim*sub_dim*sizeof(int));
-    loc_B = malloc(sub_dim*sub_dim*sizeof(int));
-    loc_C = malloc(sub_dim*sub_dim*sizeof(int));
+    //loc_A = malloc(sub_dim*sub_dim*sizeof(int));
+    //loc_B = malloc(sub_dim*sub_dim*sizeof(int));
+    //loc_C = malloc(sub_dim*sub_dim*sizeof(int));
+
+	MPI_Alloc_mem(sub_dim*sub_dim * sizeof(int), MPI_INFO_NULL, &loc_A);
+	MPI_Alloc_mem(sub_dim*sub_dim * sizeof(int), MPI_INFO_NULL, &loc_B);
+	MPI_Alloc_mem(sub_dim*sub_dim * sizeof(int), MPI_INFO_NULL, &loc_C);
     
     //define MPI type for single submatrix
     MPI_Datatype submat;
@@ -233,7 +240,11 @@ int main(int argc, char* argv[])
     MPI_Win_fence(0, win);
     MPI_Put(loc_C, sub_dim*sub_dim ,MPI_INT, 0, my_row*m_dim*sub_dim+my_col*sub_dim ,1 , submat, win);
     MPI_Win_fence(0, win);
-    MPI_Win_free(&win);
+    
+	MPI_Free_mem(loc_A);
+	MPI_Free_mem(loc_B);
+	MPI_Free_mem(loc_C);
+	MPI_Win_free(&win);
 
     // Root node final serial code
     if (rank ==0){
@@ -278,9 +289,9 @@ int main(int argc, char* argv[])
 
     }
 
-	free(full_A);
-	free(full_B);
-	free(full_C);
+	MPI_Free_mem(full_A);
+	MPI_Free_mem(full_B);
+	MPI_Free_mem(full_C);
 	//free(ser_C);
 
     MPI_Finalize();
